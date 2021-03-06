@@ -210,9 +210,9 @@ def processsheets():
           #Get the sheet from the current workbook
           sheet = wb.worksheets[0]
           current_process = sheetData()
+          paper_index = 0
           if sheet.max_row > 6:
                #Process the spreadsheet code goes here
-               index = 0
                current_process = sheetData()
                current_process.faculty_name = sheet['A3'].value
                current_process.dept_name = sheet['B3'].value
@@ -222,11 +222,17 @@ def processsheets():
                          if cell.value != None:
                               name = cell.value
                               current_process.papers.append(paper_data(name))
-                              current_process.papers[index].target = cell.offset(row=0,column=2).value
+                              current_process.papers[paper_index].target = cell.offset(row=0,column=2).value
                               for coauth in range(4):
-                                   current_process.papers[index].coauthors.append(cell.offset(row=0, column = (index + 5)).value)
-                              current_process.papers[index].fac_role = cell.offset(row=0, column = 9).value
-                              index += 1
+                                   current_process.papers[paper_index].coauthors.append(cell.offset(row=0, column = (paper_index + 5)).value)
+                              current_process.papers[paper_index].fac_role = cell.offset(row=0, column = 9).value
+                              current_process.papers[paper_index].activity_dates.append(cell.offset(row=0, column = 10).value)
+                              current_process.papers[paper_index].activity.append(cell.offset(row=0, column = 11).value)
+                              paper_index += 1
+                         elif cell.value == None:
+                              current_process.papers[paper_index-1].activity_dates.append(cell.offset(row=0, column = 10).value)
+                              current_process.papers[paper_index-1].activity.append(cell.offset(row=0, column = 11).value)
+                         
 
 
                               
@@ -249,6 +255,8 @@ if len(sys.argv) != 3:
 #assigning DB and spreadsheet file paths
 db_file = sys.argv[1]
 spreadsheet_root = sys.argv[2]
+# db_file = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\testdb - Copy.SQLITE"
+# spreadsheet_root = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\research_productivity\\research_productivity"
 
 #connecting to DB
 try:
