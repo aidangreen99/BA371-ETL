@@ -217,7 +217,7 @@ def processsheets():
                current_process.faculty_name = sheet['A3'].value
                current_process.dept_name = sheet['B3'].value
                current_process.dept_id = dept_dict[sheet['B3'].value]
-               for row in sheet.iter_rows(min_row=7, max_col=1, max_row=50):
+               for row in sheet.iter_rows(min_row=7, max_col=1, max_row=sheet.max_row):
                     for cell in row:
                          if cell.value != None:
                               name = cell.value
