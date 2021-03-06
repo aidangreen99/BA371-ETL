@@ -34,18 +34,32 @@ fac_list = ["Josie Ross", "Tallulah Stewart", "Bridget Cox", "Sally Miller", "Be
           "Zakaria Cooper", "Garfield Anderson", "Pierce Bailey", "Dan Allen", "Rick Wilson",
           "Colin Jones", "Ayub Myers", "Robert Brooks", "Darcy Sullivan", "Howard Jones"]
 
+class paper_data:
+     "This helps keep track of what belongs to what paper"
+     paper_title = ""
+     coauthors = []
+     target = ""
+     fac_role = ""
+     activity_dates = []
+     activity = []
+     def __init__(self, name):
+          self.paper_title = name
+
+
 
 class sheetData:
      "This class allows easy storage and retreival of data per faculty"
      faculty_name = ""
      dept_name = ""
      dept_id = 999
-     fac_role = []
-     paper_title = []
+     papers = []
      target_name = []
      target_type = []
      activity_type = []
      activity_date = []
+     
+
+
 
 
 def clear_transaction_tables():
@@ -151,7 +165,7 @@ def dict_fill():
           exit(1)
      for record in cursor.fetchall():
           role_dict[record[1]] = record[0]
-          print(record)
+          #print(record)
 
      #Activity types:
      query = "select activity_type_id, activity_type from activity_type;"
@@ -162,7 +176,7 @@ def dict_fill():
           exit(1)
      for record in cursor.fetchall():
           activity_type_dict[record[1]] = record[0]
-          print(record)
+          #print(record)
 
      #Target types:
      query = "select target_type_id, target_type_name from target_type;"
@@ -173,7 +187,7 @@ def dict_fill():
           exit(1)
      for record in cursor.fetchall():
           target_type_dict[record[1]] = record[0]
-          print(record)
+          #print(record)
 
      #Department IDs:
      query = "select dept_id, dept_name from depts;"
@@ -184,7 +198,7 @@ def dict_fill():
           exit(1)
      for record in cursor.fetchall():
           dept_dict[record[1]] = record[0]
-          print(record)
+          #print(record)
 
 def processsheets():
      #Variable 'spreadsheet_root' holds the name of the folder containing all the faculty folders
@@ -202,19 +216,24 @@ def processsheets():
           current_process = sheetData()
           if sheet.max_row > 6:
                #Process the spreadsheet code goes here
+               index = 0
                current_process = sheetData()
                current_process.faculty_name = sheet['A3'].value
                current_process.dept_name = sheet['B3'].value
                current_process.dept_id = dept_dict[sheet['B3'].value]
                for row in sheet.iter_rows(min_row=7, max_col=1, max_row=50):
                     for cell in row:
-                         if cell.value != None: 
-                              current_process.paper_title.append(cell.value)
-               for row in sheet.iter_rows(min_row=7, min_col=3, max_col=3, max_row=50):
-                    for cell in row:
-                         if cell.value != None and cell.value not in targets_data: 
-                              targets_data.append(cell.value)
-                              target_types_data.append(target_type_dict[cell.offset(row=0, column=-1).value])
+                         if cell.value != None:
+                              name = cell.value
+                              current_process.papers.append(paper_data(name))
+                              target = cell.offset(row=0,column=2).value
+                              coauth1, coauth2, coauth3, coauth4 = cell.offset(row=0,column=4).value, cell.offset(row=0,column=5).value, cell.offset(row=0,column=6).value, cell.offset(row=0,column=7).value
+                              role = cell
+
+
+                              
+
+               
                
 
 
