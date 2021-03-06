@@ -53,10 +53,6 @@ class sheetData:
      dept_name = ""
      dept_id = 999
      papers = []
-     target_name = []
-     target_type = []
-     activity_type = []
-     activity_date = []
      
 
 
@@ -226,9 +222,11 @@ def processsheets():
                          if cell.value != None:
                               name = cell.value
                               current_process.papers.append(paper_data(name))
-                              target = cell.offset(row=0,column=2).value
-                              coauth1, coauth2, coauth3, coauth4 = cell.offset(row=0,column=4).value, cell.offset(row=0,column=5).value, cell.offset(row=0,column=6).value, cell.offset(row=0,column=7).value
-                              role = cell
+                              current_process.papers[index].target = cell.offset(row=0,column=2).value
+                              for coauth in range(4):
+                                   current_process.papers[index].coauthors.append(cell.offset(row=0, column = (index + 5)).value)
+                              current_process.papers[index].fac_role = cell.offset(row=0, column = 9).value
+                              index += 1
 
 
                               
