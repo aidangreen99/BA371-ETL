@@ -15,9 +15,9 @@ db_file = ''
 spreadsheet_root = ''
 
 #lists babey!!
-targets_data = []
-target_types_data = []
-co_auth_data = []
+#targets_data = []
+#target_types_data = []
+#co_auth_data = []
 depts_list = ["Accounting", "Marketing", "Finance", "BIS", "Management", "Entrepreneurship"]
 target_types_list = ["journal", "conference"]
 activity_types_list = ["submitted", "accepted", "r&r", "rejected"]
@@ -36,23 +36,25 @@ fac_list = ["Josie Ross", "Tallulah Stewart", "Bridget Cox", "Sally Miller", "Be
 
 class paper_data:
      "This helps keep track of what belongs to what paper"
-     paper_title = ""
-     coauthors = []
-     target = ""
-     fac_role = ""
-     activity_dates = []
-     activity = []
-     def __init__(self, name):
-          self.paper_title = name
+     def __init__(self):
+          self.paper_title = ""
+          self.coauthors = []
+          self.target = ""
+          self.target_type = ""
+          self.fac_role = ""
+          self.activity_dates = []
+          self.activity = []
+
 
 
 
 class sheetData:
      "This class allows easy storage and retreival of data per faculty"
-     faculty_name = ""
-     dept_name = ""
-     dept_id = 999
-     papers = []
+     def __init__(self):
+          self.faculty_name = ""
+          self.dept_name = ""
+          self.dept_id = 999
+          self.papers = []
      
 
 
@@ -68,8 +70,8 @@ def clear_transaction_tables():
     cursor.execute(target_query)
     cursor.execute(authors_query)
     cursor.execute(coauthors_query)
-    cursor.execute(papers_query)
     cursor.execute(activities_query)
+    cursor.execute(papers_query)
   except Exception as err:
     print("Error clearing out transaction tables...\n", err)
     exit(1)
@@ -217,29 +219,69 @@ def processsheets():
                current_process.faculty_name = sheet['A3'].value
                current_process.dept_name = sheet['B3'].value
                current_process.dept_id = dept_dict[sheet['B3'].value]
+               current_process.papers.clear()
                for row in sheet.iter_rows(min_row=7, max_col=1, max_row=sheet.max_row):
                     for cell in row:
                          if cell.value != None:
-                              name = cell.value
-                              current_process.papers.append(paper_data(name))
+                              current_process.papers.append(paper_data())
+                              current_process.papers[paper_index].paper_title = cell.value
+                              current_process.papers[paper_index].target_type = cell.offset(row=0,column=1).value
                               current_process.papers[paper_index].target = cell.offset(row=0,column=2).value
-                              for coauth in range(4):
-                                   current_process.papers[paper_index].coauthors.append(cell.offset(row=0, column = (paper_index + 5)).value)
+                              current_process.papers[paper_index].coauthors.clear()
+                              #if cell.offset(row=0,column=2).value not in targets_data: targets_data.append(cell.offset(row=0,column=2).value)
+                              for num, coauth in enumerate(range(4)):
+                                   if cell.offset(row=0, column = (num + 4)).value != None: current_process.papers[paper_index].coauthors.append(cell.offset(row=0, column = (num + 4)).value)
                               current_process.papers[paper_index].fac_role = cell.offset(row=0, column = 9).value
-                              current_process.papers[paper_index].activity_dates.append(cell.offset(row=0, column = 10).value)
+                              current_process.papers[paper_index].activity_dates.append(cell.offset(row=0, column = 10).value.strftime('%Y-%m-%d'))
                               current_process.papers[paper_index].activity.append(cell.offset(row=0, column = 11).value)
                               paper_index += 1
                          elif cell.value == None:
-                              current_process.papers[paper_index-1].activity_dates.append(cell.offset(row=0, column = 10).value)
+                              current_process.papers[paper_index-1].activity_dates.append(cell.offset(row=0, column = 10).value.strftime('%Y-%m-%d'))
                               current_process.papers[paper_index-1].activity.append(cell.offset(row=0, column = 11).value)
-                         
-
-
-                              
-
-               
-               
-
+                    
+               for paper in current_process.papers:
+                    target_query = "insert into target (target_name, target_type_id) VALUES ('" + paper.target + "', " + str(target_type_dict[paper.target_type]) + ");"          
+                    try:
+                         cursor.execute(target_query)
+                    except Exception as err:
+                         pass
+                         #print("Error inserting into target: " + str(err) + "\n (this isn't necessarily a bad thing)")
+                    #connection.commit()
+                    paper_query = "insert into papers (title, target_id) VALUES ('" + paper.paper_title + "', (select target_id from target where target_name = '" + paper.target + "'));"
+                    try:
+                         cursor.execute(paper_query)
+                    except Exception as err:
+                         pass
+                         #print("Error inserting into papers: " + str(err))
+                    #connection.commit()
+                    fac_paper_query = "insert into fac_paper (faculty_id, paper_id, role_id) VALUES ((select faculty_id from faculty where faculty_name='" + current_process.faculty_name + "'), (select paper_id from papers where title='" + paper.paper_title + "'), " + str(role_dict[paper.fac_role]) + ");"
+                    try:
+                         cursor.execute(fac_paper_query)
+                    except Exception as err:
+                         print("Error inserting into fac_paper: " + str(err))
+                    #connection.commit()
+                    for itemID, item in enumerate(paper.activity):
+                         activity_query = "insert into activities (activity_type_id, activity_date, paper_id) VALUES (" + str(activity_type_dict[item]) + ", '" + str(paper.activity_dates[itemID]) + "', (select paper_id from papers where title='" + paper.paper_title + "'));"
+                         try:
+                              cursor.execute(activity_query)
+                         except Exception as err:
+                              print("Error inserting into activities: " + str(err))
+                    #connection.commit()
+                    for item in paper.coauthors:
+                         co_auth_query = " insert into co_auth_paper (co_auth_name, paper_id) VALUES ('" + item + "', (select paper_id from papers where title='" + paper.paper_title + "'));"
+                         try:
+                              cursor.execute(co_auth_query)
+                         except Exception as err:
+                              pass
+                              #print("Error with query: " + co_auth_query + ", " + str(err))
+                    #connection.commit()
+                    fac_dep_query = "insert into fac_dept (faculty_id, dept_id) values ((select faculty_id from faculty where faculty_name = '" + current_process.faculty_name +"'), " + str(current_process.dept_id) + ");"         
+                    try:
+                         cursor.execute(fac_dep_query)
+                    except Exception as err:
+                         pass
+                         #print("Error inserting into fac_dep: " + str(err))     
+                    connection.commit()
 
           wb.close()
 
@@ -247,16 +289,16 @@ def processsheets():
 
 
 
-#Checking command line arguments
-if len(sys.argv) != 3:
-     print("etl.py '<database_file_path>' '<spreadsheet_root_path>'")
-     sys.exit()
+# #Checking command line arguments
+# if len(sys.argv) != 3:
+#      print("etl.py '<database_file_path>' '<spreadsheet_root_path>'")
+#      sys.exit()
      
-#assigning DB and spreadsheet file paths
-db_file = sys.argv[1]
-spreadsheet_root = sys.argv[2]
-# db_file = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\testdb - Copy.SQLITE"
-# spreadsheet_root = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\research_productivity\\research_productivity"
+# #assigning DB and spreadsheet file paths
+# db_file = sys.argv[1]
+# spreadsheet_root = sys.argv[2]
+db_file = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\testdb - Copy.SQLITE"
+spreadsheet_root = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\research_productivity\\research_productivity"
 
 #connecting to DB
 try:
