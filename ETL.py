@@ -289,16 +289,15 @@ def processsheets():
 
 
 
-# #Checking command line arguments
-# if len(sys.argv) != 3:
-#      print("etl.py '<database_file_path>' '<spreadsheet_root_path>'")
-#      sys.exit()
+#Checking command line arguments
+if len(sys.argv) != 3:
+     print("etl.py \"<database_file_path>\" \"<spreadsheet_root_path>\"")
+     sys.exit()
      
-# #assigning DB and spreadsheet file paths
-# db_file = sys.argv[1]
-# spreadsheet_root = sys.argv[2]
-db_file = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\testdb - Copy.SQLITE"
-spreadsheet_root = "C:\\Users\\Aidan\\Documents\\BA371\\Group\\research_productivity\\research_productivity"
+#assigning DB and spreadsheet file paths
+db_file = sys.argv[1]
+spreadsheet_root = sys.argv[2]
+
 
 #connecting to DB
 try:
