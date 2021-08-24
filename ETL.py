@@ -6,7 +6,7 @@ import sqlite3
 
 #py ETL.py "C:\Users\Aidan\Documents\BA371\Group\testdb - Copy.SQLITE" "C:\Users\Aidan\Documents\BA371\Group\research_productivity\research_productivity"
 
-#setting up gloabal variables
+#setting up global variables
 role_dict = {}
 activity_type_dict = {}
 target_type_dict = {}
@@ -14,7 +14,7 @@ dept_dict = {}
 db_file = ''
 spreadsheet_root = ''
 
-#lists babey!!
+#Necessary lists
 #targets_data = []
 #target_types_data = []
 #co_auth_data = []
@@ -22,7 +22,7 @@ depts_list = ["Accounting", "Marketing", "Finance", "BIS", "Management", "Entrep
 target_types_list = ["journal", "conference"]
 activity_types_list = ["submitted", "accepted", "r&r", "rejected"]
 roles_list = ["Contributor", "Lead", "Co_lead"]
-#I'm sorry, this has to be done :(
+#Not the best solution for faculty list, see readme for explanation
 fac_list = ["Josie Ross", "Tallulah Stewart", "Bridget Cox", "Sally Miller", "Bella Foster", 
           "Sapphire Carter", "Amelia Lewis", "Mindy Garcia", "Ebony Taylor", "Carrie Perry", 
           "Anaya Kelly", "Ayat Reed", "Ria Green", "Klaudia Jenkins", "Myah Watson", 
